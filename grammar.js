@@ -9,7 +9,6 @@ export default grammar({
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
     [$.block, $.instantiation_expression],
-    [$.element_expression],
   ],
 
   rules: {
@@ -149,8 +148,14 @@ export default grammar({
       seq(
         "#",
         field("tag", $.identifier),
-        optional(field("properties", $.element_args)),
-        optional(prec.dynamic(1, field("children", $.block))),
+        choice(
+          seq(
+            field("properties", $.element_args),
+            optional(field("children", $.block)),
+          ),
+          field("children", $.block),
+          blank(),
+        ),
       ),
 
     element_args: ($) => seq("(", commaSep($.element_property), ")"),
