@@ -9,7 +9,7 @@ export default grammar({
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
     [$.block, $.instantiation_expression],
-    [$.element_expression], // AUTHORIZES THE GLR LOOKAHEAD FOR OPTIONAL ELEMENT BLOCKS
+    [$.element_expression],
   ],
 
   rules: {
@@ -77,13 +77,16 @@ export default grammar({
     // ==========================================
 
     function_definition: ($) =>
-      seq(
-        "fn",
-        field("name", $.identifier),
-        field("parameters", $.parameter_list),
-        optional(seq(":", field("return_type", $.type_expr))),
-        "=>",
-        field("body", $.expression), // FIXED: Allows both standard blocks AND inline record structures!
+      prec(
+        2,
+        seq(
+          "fn",
+          field("name", $.identifier),
+          field("parameters", $.parameter_list),
+          optional(seq(":", field("return_type", $.type_expr))),
+          "=>",
+          field("body", $.expression),
+        ),
       ),
 
     parameter_list: ($) => seq("(", commaSep($.parameter), ")"),
