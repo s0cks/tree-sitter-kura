@@ -15,7 +15,7 @@ export default grammar({
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
     [$.block, $.instantiation_expression],
-    [$.element_expression],
+    [$.element_expression], // Authorizes GLR lookahead branching for optional element blocks
   ],
 
   rules: {
@@ -87,21 +87,15 @@ export default grammar({
         "fn",
         field("name", $.identifier),
         field("parameters", $.parameter_list),
-        // FIXED: Using type_identifier prevents lookahead forks from breaking the signature
         optional(seq(":", field("return_type", $.type_identifier))),
         "=>",
-        field("body", $.block),
+        field("body", $.block), // Solid, unambiguous root body boundary
       ),
 
     parameter_list: ($) => seq("(", commaSep($.parameter), ")"),
 
     parameter: ($) =>
-      seq(
-        field("name", $.identifier),
-        ":",
-        // FIXED: Using type_identifier here cleans up inner tracking parameters smoothly
-        field("type", $.type_identifier),
-      ),
+      seq(field("name", $.identifier), ":", field("type", $.type_identifier)),
 
     // ==========================================
     // EXPRESSIONS & STATEMENTS
@@ -158,33 +152,12 @@ export default grammar({
     // ==========================================
 
     element_expression: ($) =>
-      choice(
-        // Path 1: Tag with property list and children block
-        prec(
-          2,
-          seq(
-            "#",
-            field("tag", $.identifier),
-            field("properties", $.element_args),
-            field("children", $.block),
-          ),
-        ),
-
-        // Path 2: Tag straight to children block (e.g., #fragment { ... })
-        prec(
-          2,
-          seq("#", field("tag", $.identifier), field("children", $.block)),
-        ),
-
-        // Path 3: A standalone leaf macro (e.g., #text(text) or a plain tag reference)
-        prec(
-          1,
-          seq(
-            "#",
-            field("tag", $.identifier),
-            optional(field("properties", $.element_args)),
-          ),
-        ),
+      seq(
+        "#",
+        field("tag", $.identifier),
+        optional(field("properties", $.element_args)),
+        // Force greedy binding of { } directly to the macro token if present
+        optional(prec.dynamic(1, field("children", $.block))),
       ),
 
     element_args: ($) => seq("(", commaSep1($.element_property), ")"),
