@@ -147,26 +147,22 @@ export default grammar({
 
     element_expression: ($) =>
       choice(
-        // Path 1: Tag with attributes and optional children block
+        // Path 1: MUST have an element argument block (e.g., #button(fill: red))
         seq(
           "#",
           field("tag", $.identifier),
           field("properties", $.element_args),
-          optional(prec.dynamic(1, field("children", $.block))),
+          optional(field("children", $.block)),
         ),
 
-        // Path 2: Tag directly followed by a children block (e.g., #fragment{ ... })
-        seq(
-          "#",
-          field("tag", $.identifier),
-          prec.dynamic(1, field("children", $.block)),
-        ),
+        // Path 2: Direct jump to children block (e.g., #fragment{ ... })
+        seq("#", field("tag", $.identifier), field("children", $.block)),
 
-        // Path 3: A leaf macro tag on its own (e.g., #text leaf node with no braces)
+        // Path 3: A completely standalone leaf macro (e.g., #text)
         seq("#", field("tag", $.identifier)),
       ),
 
-    element_args: ($) => seq("(", commaSep($.element_property), ")"),
+    element_args: ($) => seq("(", commaSep1($.element_property), ")"),
 
     element_property: ($) =>
       seq(field("key", $.identifier), ":", field("value", $.expression)),

@@ -880,15 +880,11 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "PREC_DYNAMIC",
-                  "value": 1,
+                  "type": "FIELD",
+                  "name": "children",
                   "content": {
-                    "type": "FIELD",
-                    "name": "children",
-                    "content": {
-                      "type": "SYMBOL",
-                      "name": "block"
-                    }
+                    "type": "SYMBOL",
+                    "name": "block"
                   }
                 },
                 {
@@ -914,15 +910,11 @@
               }
             },
             {
-              "type": "PREC_DYNAMIC",
-              "value": 1,
+              "type": "FIELD",
+              "name": "children",
               "content": {
-                "type": "FIELD",
-                "name": "children",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "block"
-                }
+                "type": "SYMBOL",
+                "name": "block"
               }
             }
           ]
@@ -954,35 +946,27 @@
           "value": "("
         },
         {
-          "type": "CHOICE",
+          "type": "SEQ",
           "members": [
             {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "element_property"
-                },
-                {
-                  "type": "REPEAT",
-                  "content": {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "STRING",
-                        "value": ","
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "element_property"
-                      }
-                    ]
-                  }
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "element_property"
             },
             {
-              "type": "BLANK"
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": ","
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "element_property"
+                  }
+                ]
+              }
             }
           ]
         },
