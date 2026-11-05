@@ -218,7 +218,7 @@
         "required": true,
         "types": [
           {
-            "type": "expression",
+            "type": "block",
             "named": true
           }
         ]
@@ -460,10 +460,6 @@
       "required": false,
       "types": [
         {
-          "type": "expression",
-          "named": true
-        },
-        {
           "type": "function_definition",
           "named": true
         },
@@ -661,6 +657,10 @@
   },
   {
     "type": ":",
+    "named": false
+  },
+  {
+    "type": ";",
     "named": false
   },
   {

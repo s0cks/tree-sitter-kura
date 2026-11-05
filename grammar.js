@@ -15,15 +15,13 @@ export default grammar({
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
     [$.block, $.instantiation_expression],
-    [$.element_expression], // AUTHORIZES LOOKAHEAD SELECTION FOR #ELEMENT { BLOCKS }
+    [$.element_expression],
   ],
 
   rules: {
-    // 1. FIXED: Top level loop can gracefully accept expressions alongside definitions
     source_file: ($) => repeat($._definition),
 
-    _definition: ($) =>
-      choice($.type_definition, $.function_definition, $.expression),
+    _definition: ($) => choice($.type_definition, $.function_definition),
 
     // ==========================================
     // TYPE DEFINITIONS
@@ -91,7 +89,7 @@ export default grammar({
         field("parameters", $.parameter_list),
         optional(seq(":", field("return_type", $.type_identifier))),
         "=>",
-        field("body", $.expression),
+        field("body", $.block),
       ),
 
     parameter_list: ($) => seq("(", commaSep($.parameter), ")"),
@@ -133,7 +131,12 @@ export default grammar({
         optional(seq("else", field("alternative", $.block))),
       ),
 
-    block: ($) => seq("{", repeat($.expression), "}"),
+    block: ($) =>
+      seq(
+        "{",
+        repeat(seq($.expression, optional(";"))), // FIXED: Allows clean semicolon-free statement streaming!
+        "}",
+      ),
 
     binary_expression: ($) =>
       choice(
@@ -154,17 +157,32 @@ export default grammar({
     // ==========================================
 
     element_expression: ($) =>
-      seq(
-        "#",
-        field("tag", $.identifier),
-        choice(
-          // 2. FIXED: Explicit sequenced choices cleanly extract both formats with zero shift errors
+      choice(
+        // Path 1: #button(fill: red) { ... }
+        prec(
+          2,
           seq(
+            "#",
+            field("tag", $.identifier),
             field("properties", $.element_args),
-            optional(field("children", $.block)),
+            field("children", $.block),
           ),
-          field("children", $.block),
-          blank(),
+        ),
+
+        // Path 2: #fragment { ... }
+        prec(
+          2,
+          seq("#", field("tag", $.identifier), field("children", $.block)),
+        ),
+
+        // Path 3: Inline leaf tag macro calls (e.g., #text(text))
+        prec(
+          1,
+          seq(
+            "#",
+            field("tag", $.identifier),
+            optional(field("properties", $.element_args)),
+          ),
         ),
       ),
 
