@@ -15,13 +15,15 @@ export default grammar({
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
     [$.block, $.instantiation_expression],
-    [$.element_expression], // Authorizes GLR lookahead branching for optional element blocks
+    [$.element_expression], // AUTHORIZES LOOKAHEAD SELECTION FOR #ELEMENT { BLOCKS }
   ],
 
   rules: {
+    // 1. FIXED: Top level loop can gracefully accept expressions alongside definitions
     source_file: ($) => repeat($._definition),
 
-    _definition: ($) => choice($.type_definition, $.function_definition),
+    _definition: ($) =>
+      choice($.type_definition, $.function_definition, $.expression),
 
     // ==========================================
     // TYPE DEFINITIONS
@@ -89,7 +91,7 @@ export default grammar({
         field("parameters", $.parameter_list),
         optional(seq(":", field("return_type", $.type_identifier))),
         "=>",
-        field("body", $.block), // Solid, unambiguous root body boundary
+        field("body", $.expression),
       ),
 
     parameter_list: ($) => seq("(", commaSep($.parameter), ")"),
@@ -155,9 +157,15 @@ export default grammar({
       seq(
         "#",
         field("tag", $.identifier),
-        optional(field("properties", $.element_args)),
-        // Force greedy binding of { } directly to the macro token if present
-        optional(prec.dynamic(1, field("children", $.block))),
+        choice(
+          // 2. FIXED: Explicit sequenced choices cleanly extract both formats with zero shift errors
+          seq(
+            field("properties", $.element_args),
+            optional(field("children", $.block)),
+          ),
+          field("children", $.block),
+          blank(),
+        ),
       ),
 
     element_args: ($) => seq("(", commaSep1($.element_property), ")"),
