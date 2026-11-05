@@ -1,6 +1,6 @@
 pre-commit:
   commands:
     ts-generate:
-      glob: "grammar.js"
+      glob: "*grammar.js"
       run: pnpm tree-sitter generate
       stage_fixed: true

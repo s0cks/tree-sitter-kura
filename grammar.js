@@ -9,6 +9,7 @@ export default grammar({
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
     [$.block, $.instantiation_expression],
+    [$.element_expression], // AUTHORIZES THE GLR LOOKAHEAD FOR OPTIONAL ELEMENT BLOCKS
   ],
 
   rules: {
@@ -149,11 +150,14 @@ export default grammar({
         "#",
         field("tag", $.identifier),
         choice(
+          // Path 1: It has properties, and optionally children trailing them
           seq(
             field("properties", $.element_args),
             optional(field("children", $.block)),
           ),
+          // Path 2: It has no properties, but directly captures the children block
           field("children", $.block),
+          // Path 3: Just a bare standalone element macro leaf
           blank(),
         ),
       ),

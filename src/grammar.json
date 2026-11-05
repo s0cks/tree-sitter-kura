@@ -869,31 +869,40 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "FIELD",
-              "name": "properties",
-              "content": {
-                "type": "SYMBOL",
-                "name": "element_args"
-              }
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "FIELD",
+                  "name": "properties",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "element_args"
+                  }
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "FIELD",
+                      "name": "children",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "block"
+                      }
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
             },
             {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "PREC_DYNAMIC",
-              "value": 1,
+              "type": "FIELD",
+              "name": "children",
               "content": {
-                "type": "FIELD",
-                "name": "children",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "block"
-                }
+                "type": "SYMBOL",
+                "name": "block"
               }
             },
             {
