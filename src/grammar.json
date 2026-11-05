@@ -494,7 +494,7 @@
                   "name": "return_type",
                   "content": {
                     "type": "SYMBOL",
-                    "name": "type_expr"
+                    "name": "type_identifier"
                   }
                 }
               ]
@@ -513,7 +513,7 @@
           "name": "body",
           "content": {
             "type": "SYMBOL",
-            "name": "expression"
+            "name": "block"
           }
         }
       ]
@@ -584,7 +584,7 @@
           "name": "type",
           "content": {
             "type": "SYMBOL",
-            "name": "type_expr"
+            "name": "type_identifier"
           }
         }
       ]

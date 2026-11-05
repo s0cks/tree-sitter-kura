@@ -218,7 +218,7 @@
         "required": true,
         "types": [
           {
-            "type": "expression",
+            "type": "block",
             "named": true
           }
         ]
@@ -248,7 +248,7 @@
         "required": false,
         "types": [
           {
-            "type": "type_expr",
+            "type": "type_identifier",
             "named": true
           }
         ]
@@ -377,7 +377,7 @@
         "required": true,
         "types": [
           {
-            "type": "type_expr",
+            "type": "type_identifier",
             "named": true
           }
         ]

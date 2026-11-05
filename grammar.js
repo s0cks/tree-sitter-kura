@@ -15,7 +15,6 @@ export default grammar({
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
     [$.block, $.instantiation_expression],
-    // Force lookahead evaluation when elements are followed by a block
     [$.element_expression],
   ],
 
@@ -88,15 +87,21 @@ export default grammar({
         "fn",
         field("name", $.identifier),
         field("parameters", $.parameter_list),
-        optional(seq(":", field("return_type", $.type_expr))),
+        // FIXED: Using type_identifier prevents lookahead forks from breaking the signature
+        optional(seq(":", field("return_type", $.type_identifier))),
         "=>",
-        field("body", $.expression),
+        field("body", $.block),
       ),
 
     parameter_list: ($) => seq("(", commaSep($.parameter), ")"),
 
     parameter: ($) =>
-      seq(field("name", $.identifier), ":", field("type", $.type_expr)),
+      seq(
+        field("name", $.identifier),
+        ":",
+        // FIXED: Using type_identifier here cleans up inner tracking parameters smoothly
+        field("type", $.type_identifier),
+      ),
 
     // ==========================================
     // EXPRESSIONS & STATEMENTS
@@ -154,7 +159,7 @@ export default grammar({
 
     element_expression: ($) =>
       choice(
-        // High static precedence: force lookahead parsing to prefer consuming trailing blocks
+        // Path 1: Tag with property list and children block
         prec(
           2,
           seq(
@@ -165,12 +170,13 @@ export default grammar({
           ),
         ),
 
+        // Path 2: Tag straight to children block (e.g., #fragment { ... })
         prec(
           2,
           seq("#", field("tag", $.identifier), field("children", $.block)),
         ),
 
-        // Lower precedence: matches only if no properties block or curly block follows
+        // Path 3: A standalone leaf macro (e.g., #text(text) or a plain tag reference)
         prec(
           1,
           seq(
