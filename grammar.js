@@ -1,3 +1,9 @@
+/**
+ * @file Tree-sitter grammar for Kura
+ * @author tazz
+ * @license MIT
+ */
+
 export default grammar({
   name: "kura",
 
@@ -9,7 +15,8 @@ export default grammar({
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
     [$.block, $.instantiation_expression],
-    [$.element_expression], // Required to authorize lookahead branching for trailing blocks
+    // Force lookahead evaluation when elements are followed by a block
+    [$.element_expression],
   ],
 
   rules: {
@@ -147,19 +154,31 @@ export default grammar({
 
     element_expression: ($) =>
       choice(
-        // Path 1: MUST have an element argument block (e.g., #button(fill: red))
-        seq(
-          "#",
-          field("tag", $.identifier),
-          field("properties", $.element_args),
-          optional(field("children", $.block)),
+        // High static precedence: force lookahead parsing to prefer consuming trailing blocks
+        prec(
+          2,
+          seq(
+            "#",
+            field("tag", $.identifier),
+            field("properties", $.element_args),
+            field("children", $.block),
+          ),
         ),
 
-        // Path 2: Direct jump to children block (e.g., #fragment{ ... })
-        seq("#", field("tag", $.identifier), field("children", $.block)),
+        prec(
+          2,
+          seq("#", field("tag", $.identifier), field("children", $.block)),
+        ),
 
-        // Path 3: A completely standalone leaf macro (e.g., #text)
-        seq("#", field("tag", $.identifier)),
+        // Lower precedence: matches only if no properties block or curly block follows
+        prec(
+          1,
+          seq(
+            "#",
+            field("tag", $.identifier),
+            optional(field("properties", $.element_args)),
+          ),
+        ),
       ),
 
     element_args: ($) => seq("(", commaSep1($.element_property), ")"),
