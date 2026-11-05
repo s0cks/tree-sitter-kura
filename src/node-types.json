@@ -102,7 +102,7 @@
     "fields": {
       "children": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "block",
@@ -261,7 +261,7 @@
     "fields": {
       "alternative": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "block",

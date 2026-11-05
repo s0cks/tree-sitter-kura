@@ -1,22 +1,17 @@
 export default grammar({
   name: "kura",
-
-  // Ensure keywords don't accidentally match substrings of identifiers
   word: ($) => $.identifier,
 
-  extras: ($) => [
-    /\s/, // Whitespace
-    $.comment, // Comments
-  ],
+  extras: ($) => [/\s/, $.comment],
 
   conflicts: ($) => [
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
-    [$.block, $.instantiation_expression], // FIXES THE CURLY BRACE AMBIGUITY
+    [$.block, $.instantiation_expression],
+    [$.element_expression], // Allows lookahead resolution for the trailing curly braces
   ],
 
   rules: {
-    // Top-level entry point
     source_file: ($) => repeat($._definition),
 
     _definition: ($) => choice($.type_definition, $.function_definition),
@@ -107,7 +102,7 @@ export default grammar({
         $.instantiation_expression,
         $.binary_expression,
         $.identifier,
-        $.type_identifier, // Handles cases like None or Tick in expressions
+        $.type_identifier,
         $.string,
         $.number,
         $.block,
@@ -126,8 +121,7 @@ export default grammar({
         "if",
         field("condition", $.expression),
         field("consequence", $.block),
-        "else",
-        field("alternative", $.block),
+        optional(seq("else", field("alternative", $.block))),
       ),
 
     block: ($) => seq("{", repeat($.expression), "}"),
@@ -138,7 +132,6 @@ export default grammar({
           1,
           seq(field("left", $.expression), ">", field("right", $.expression)),
         ),
-        // Add other operators here as your compiler targets them
       ),
 
     instantiation_expression: ($) =>
@@ -154,9 +147,10 @@ export default grammar({
     element_expression: ($) =>
       seq(
         "#",
-        field("tag", $.identifier), // #button
-        optional(field("properties", $.element_args)), // (fill: blue)
-        field("children", $.block), // { #text("Close") }
+        field("tag", $.identifier),
+        optional(field("properties", $.element_args)),
+        // Force Tree-sitter to greedily capture { } as children when present
+        optional(prec.dynamic(1, field("children", $.block))),
       ),
 
     element_args: ($) => seq("(", commaSep($.element_property), ")"),
@@ -168,10 +162,8 @@ export default grammar({
     // LEXICAL ATOMS & IDENTIFIERS
     // ==========================================
 
-    // Lowercase identifiers (variables, fields, function names, element tags)
     identifier: ($) => /[a-z_][a-zA-Z0-9_]*/,
 
-    // Uppercase identifiers (types, union variants)
     type_identifier: ($) => /[A-Z][a-zA-Z0-9_]*/,
 
     string: ($) => seq('"', repeat(/[^"\\]/), '"'),
@@ -182,7 +174,6 @@ export default grammar({
   },
 });
 
-// Helper functions for common separation rules
 function commaSep(rule) {
   return optional(commaSep1(rule));
 }
