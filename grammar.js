@@ -1,9 +1,3 @@
-/**
- * @file Tree-sitter grammar for Kura
- * @author tazz
- * @license MIT
- */
-
 export default grammar({
   name: "kura",
 
@@ -87,15 +81,15 @@ export default grammar({
         "fn",
         field("name", $.identifier),
         field("parameters", $.parameter_list),
-        optional(seq(":", field("return_type", $.type_identifier))),
+        optional(seq(":", field("return_type", $.type_expr))),
         "=>",
-        field("body", $.block),
+        field("body", $.expression),
       ),
 
     parameter_list: ($) => seq("(", commaSep($.parameter), ")"),
 
     parameter: ($) =>
-      seq(field("name", $.identifier), ":", field("type", $.type_identifier)),
+      seq(field("name", $.identifier), ":", field("type", $.type_expr)),
 
     // ==========================================
     // EXPRESSIONS & STATEMENTS
@@ -131,12 +125,7 @@ export default grammar({
         optional(seq("else", field("alternative", $.block))),
       ),
 
-    block: ($) =>
-      seq(
-        "{",
-        repeat(seq($.expression, optional(";"))), // FIXED: Allows clean semicolon-free statement streaming!
-        "}",
-      ),
+    block: ($) => seq("{", repeat($.expression), "}"),
 
     binary_expression: ($) =>
       choice(
@@ -158,9 +147,9 @@ export default grammar({
 
     element_expression: ($) =>
       choice(
-        // Path 1: #button(fill: red) { ... }
+        // Path 1: Tag with attributes/arguments and an attached block
         prec(
-          2,
+          3,
           seq(
             "#",
             field("tag", $.identifier),
@@ -169,15 +158,15 @@ export default grammar({
           ),
         ),
 
-        // Path 2: #fragment { ... }
+        // Path 2: Tag straight to children block (e.g., #fragment { ... })
         prec(
-          2,
+          3,
           seq("#", field("tag", $.identifier), field("children", $.block)),
         ),
 
-        // Path 3: Inline leaf tag macro calls (e.g., #text(text))
+        // Path 3: Standalone leaf tag macro call (e.g. #text(text) or #text("Close"))
         prec(
-          1,
+          2,
           seq(
             "#",
             field("tag", $.identifier),
@@ -186,7 +175,13 @@ export default grammar({
         ),
       ),
 
-    element_args: ($) => seq("(", commaSep1($.element_property), ")"),
+    // FIXED: Supports both named properties (fill: red) AND plain positional expressions ("Close")
+    element_args: ($) =>
+      seq(
+        "(",
+        choice(commaSep1($.element_property), commaSep1($.expression)),
+        ")",
+      ),
 
     element_property: ($) =>
       seq(field("key", $.identifier), ":", field("value", $.expression)),

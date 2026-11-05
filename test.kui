@@ -1,1 +1,35 @@
-fn main() {}
+type Position = {
+  x: Number,
+  y: Number,
+  z?: Number,
+}
+
+type Message = Click(Position) | Tick | Set(Number)
+type Optional<T> = Some(T) | None
+type Op = (Number, Number) => Number
+type Content = Node | None
+type State = { message: String }
+
+fn init() => { message: "Hello World" }
+
+fn view(count: Int): Node => {
+  let text = if count > 1 { "Done" } else { "Hello World" }
+
+  #fragment{
+    #button(fill: red){
+      #text(text)
+    }
+
+    #button(fill: blue){
+      #text("Close")
+    }
+
+    #button(fill: green){
+      #text("Close")
+    }
+
+    #button(fill: blue){
+      #text("Close")
+    }
+  }
+}

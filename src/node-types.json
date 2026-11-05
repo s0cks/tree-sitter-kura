@@ -92,6 +92,10 @@
         {
           "type": "element_property",
           "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
         }
       ]
     }
@@ -218,7 +222,7 @@
         "required": true,
         "types": [
           {
-            "type": "block",
+            "type": "expression",
             "named": true
           }
         ]
@@ -248,7 +252,7 @@
         "required": false,
         "types": [
           {
-            "type": "type_identifier",
+            "type": "type_expr",
             "named": true
           }
         ]
@@ -377,7 +381,7 @@
         "required": true,
         "types": [
           {
-            "type": "type_identifier",
+            "type": "type_expr",
             "named": true
           }
         ]
@@ -657,10 +661,6 @@
   },
   {
     "type": ":",
-    "named": false
-  },
-  {
-    "type": ";",
     "named": false
   },
   {
