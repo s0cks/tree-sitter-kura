@@ -154,15 +154,15 @@ export default grammar({
     element_expression: ($) =>
       seq(
         "#",
-        field("tag", $.identifier),
-        optional(field("arguments", $.element_arguments)),
-        field("body", $.block),
+        field("tag", $.identifier), // #button
+        optional(field("properties", $.element_args)), // (fill: blue)
+        field("children", $.block), // { #text("Close") }
       ),
 
-    element_arguments: ($) => seq("(", commaSep($.element_argument), ")"),
+    element_args: ($) => seq("(", commaSep($.element_property), ")"),
 
-    element_argument: ($) =>
-      seq(field("name", $.identifier), ":", field("value", $.expression)),
+    element_property: ($) =>
+      seq(field("key", $.identifier), ":", field("value", $.expression)),
 
     // ==========================================
     // LEXICAL ATOMS & IDENTIFIERS
