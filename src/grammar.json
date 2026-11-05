@@ -513,7 +513,7 @@
           "name": "body",
           "content": {
             "type": "SYMBOL",
-            "name": "block"
+            "name": "expression"
           }
         }
       ]

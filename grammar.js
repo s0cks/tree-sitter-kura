@@ -1,5 +1,6 @@
 export default grammar({
   name: "kura",
+
   word: ($) => $.identifier,
 
   extras: ($) => [/\s/, $.comment],
@@ -8,7 +9,7 @@ export default grammar({
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
     [$.block, $.instantiation_expression],
-    [$.element_expression], // Allows lookahead resolution for the trailing curly braces
+    [$.element_expression],
   ],
 
   rules: {
@@ -82,7 +83,7 @@ export default grammar({
         field("parameters", $.parameter_list),
         optional(seq(":", field("return_type", $.type_expr))),
         "=>",
-        field("body", $.block),
+        field("body", $.expression), // FIXED: Allows both standard blocks AND inline record structures!
       ),
 
     parameter_list: ($) => seq("(", commaSep($.parameter), ")"),
@@ -149,7 +150,6 @@ export default grammar({
         "#",
         field("tag", $.identifier),
         optional(field("properties", $.element_args)),
-        // Force Tree-sitter to greedily capture { } as children when present
         optional(prec.dynamic(1, field("children", $.block))),
       ),
 
