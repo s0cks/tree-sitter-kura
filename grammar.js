@@ -9,7 +9,7 @@ export default grammar({
     [$.type_expr, $.expression],
     [$.variant, $.type_expr],
     [$.block, $.instantiation_expression],
-    [$.element_expression],
+    [$.element_expression], // Required to authorize lookahead branching for trailing blocks
   ],
 
   rules: {
@@ -77,16 +77,13 @@ export default grammar({
     // ==========================================
 
     function_definition: ($) =>
-      prec(
-        2,
-        seq(
-          "fn",
-          field("name", $.identifier),
-          field("parameters", $.parameter_list),
-          optional(seq(":", field("return_type", $.type_expr))),
-          "=>",
-          field("body", $.expression),
-        ),
+      seq(
+        "fn",
+        field("name", $.identifier),
+        field("parameters", $.parameter_list),
+        optional(seq(":", field("return_type", $.type_expr))),
+        "=>",
+        field("body", $.expression),
       ),
 
     parameter_list: ($) => seq("(", commaSep($.parameter), ")"),
@@ -149,20 +146,24 @@ export default grammar({
     // ==========================================
 
     element_expression: ($) =>
-      seq(
-        "#",
-        field("tag", $.identifier),
-        choice(
-          // Path 1: It has properties, and optionally children trailing them
-          seq(
-            field("properties", $.element_args),
-            optional(field("children", $.block)),
-          ),
-          // Path 2: It has no properties, but directly captures the children block
-          field("children", $.block),
-          // Path 3: Just a bare standalone element macro leaf
-          blank(),
+      choice(
+        // Path 1: Tag with attributes and optional children block
+        seq(
+          "#",
+          field("tag", $.identifier),
+          field("properties", $.element_args),
+          optional(prec.dynamic(1, field("children", $.block))),
         ),
+
+        // Path 2: Tag directly followed by a children block (e.g., #fragment{ ... })
+        seq(
+          "#",
+          field("tag", $.identifier),
+          prec.dynamic(1, field("children", $.block)),
+        ),
+
+        // Path 3: A leaf macro tag on its own (e.g., #text leaf node with no braces)
+        seq("#", field("tag", $.identifier)),
       ),
 
     element_args: ($) => seq("(", commaSep($.element_property), ")"),
