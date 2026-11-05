@@ -10,7 +10,9 @@ export default grammar({
   ],
 
   conflicts: ($) => [
-    [$.type_expr, $.expression], // Resolves ambiguity between identifiers in types vs expressions
+    [$.type_expr, $.expression],
+    [$.variant, $.type_expr],
+    [$.block, $.instantiation_expression], // FIXES THE CURLY BRACE AMBIGUITY
   ],
 
   rules: {
