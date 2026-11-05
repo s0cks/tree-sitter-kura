@@ -1,3 +1,9 @@
+/**
+ * @file Tree-sitter grammar for Kura
+ * @author tazz
+ * @license MIT
+ */
+
 export default grammar({
   name: "kura",
 
@@ -15,7 +21,15 @@ export default grammar({
   rules: {
     source_file: ($) => repeat($._definition),
 
-    _definition: ($) => choice($.type_definition, $.function_definition),
+    _definition: ($) =>
+      choice(
+        $.use_declaration,
+        $.type_definition,
+        $.function_definition,
+        $.expression,
+      ),
+
+    use_declaration: ($) => seq("use", field("path", $.string)),
 
     // ==========================================
     // TYPE DEFINITIONS
@@ -78,6 +92,7 @@ export default grammar({
 
     function_definition: ($) =>
       seq(
+        repeat($.annotation),
         "fn",
         field("name", $.identifier),
         field("parameters", $.parameter_list),
@@ -91,6 +106,13 @@ export default grammar({
     parameter: ($) =>
       seq(field("name", $.identifier), ":", field("type", $.type_expr)),
 
+    annotation: ($) =>
+      seq(
+        "@",
+        field("name", $.identifier),
+        optional(field("arguments", $.element_args)),
+      ),
+
     // ==========================================
     // EXPRESSIONS & STATEMENTS
     // ==========================================
@@ -99,11 +121,18 @@ export default grammar({
       choice(
         $.let_binding,
         $.if_expression,
+        $.match_expression,
+        $.for_expression,
         $.element_expression,
         $.instantiation_expression,
         $.binary_expression,
+        $.pipe_expression,
+        $.call_expression,
+        $.array_expression,
+        $.member_expression,
         $.identifier,
         $.type_identifier,
+        $.wildcard,
         $.string,
         $.number,
         $.block,
@@ -125,18 +154,87 @@ export default grammar({
         optional(seq("else", field("alternative", $.block))),
       ),
 
-    block: ($) => seq("{", repeat($.expression), "}"),
+    match_expression: ($) =>
+      seq(
+        "match",
+        field("value", $.expression),
+        "{",
+        repeat(seq($.match_arm, optional(","))),
+        "}",
+      ),
+
+    match_arm: ($) =>
+      seq(field("pattern", $.expression), "=>", field("value", $.expression)),
+
+    for_expression: ($) =>
+      seq(
+        "for",
+        field("item", $.identifier),
+        "in",
+        field("iterable", $.expression),
+        optional(seq("if", field("condition", $.expression))),
+        optional(
+          seq(
+            "fold",
+            field("accumulator", $.identifier),
+            "=",
+            field("initial", $.expression),
+          ),
+        ),
+        "=>",
+        field("body", $.expression),
+      ),
+
+    block: ($) => seq("{", repeat(seq($.expression, optional(";"))), "}"),
 
     binary_expression: ($) =>
       choice(
         prec.left(
-          1,
+          2,
           seq(field("left", $.expression), ">", field("right", $.expression)),
+        ),
+        prec.left(
+          2,
+          seq(field("left", $.expression), "<", field("right", $.expression)),
+        ),
+        prec.left(
+          1,
+          seq(field("left", $.expression), "+", field("right", $.expression)),
+        ),
+      ),
+
+    pipe_expression: ($) =>
+      prec.left(
+        3,
+        seq(field("left", $.expression), "|>", field("right", $.expression)),
+      ),
+
+    call_expression: ($) =>
+      prec.left(
+        4,
+        seq(field("function", $.expression), "(", commaSep($.expression), ")"),
+      ),
+
+    array_expression: ($) => seq("[", commaSep($.expression), "]"),
+
+    member_expression: ($) =>
+      prec.left(
+        5,
+        seq(
+          field("object", $.expression),
+          ".",
+          field("property", $.identifier),
         ),
       ),
 
     instantiation_expression: ($) =>
-      seq("{", commaSep($.instantiation_field), optional(","), "}"),
+      seq(
+        "{",
+        optional(seq("...", field("spread", $.expression), ",")),
+        commaSep($.instantiation_field),
+        optional(","),
+        "}",
+      ),
 
     instantiation_field: ($) =>
       seq(field("name", $.identifier), ":", field("value", $.expression)),
@@ -146,36 +244,20 @@ export default grammar({
     // ==========================================
 
     element_expression: ($) =>
-      choice(
-        // Path 1: Tag with attributes/arguments and an attached block
-        prec(
-          3,
+      seq(
+        repeat($.annotation),
+        "#",
+        field("tag", $.identifier),
+        choice(
           seq(
-            "#",
-            field("tag", $.identifier),
             field("properties", $.element_args),
-            field("children", $.block),
+            optional(prec.dynamic(1, field("children", $.block))),
           ),
-        ),
-
-        // Path 2: Tag straight to children block (e.g., #fragment { ... })
-        prec(
-          3,
-          seq("#", field("tag", $.identifier), field("children", $.block)),
-        ),
-
-        // Path 3: Standalone leaf tag macro call (e.g. #text(text) or #text("Close"))
-        prec(
-          2,
-          seq(
-            "#",
-            field("tag", $.identifier),
-            optional(field("properties", $.element_args)),
-          ),
+          prec.dynamic(1, field("children", $.block)),
+          blank(),
         ),
       ),
 
-    // FIXED: Supports both named properties (fill: red) AND plain positional expressions ("Close")
     element_args: ($) =>
       seq(
         "(",
@@ -190,13 +272,16 @@ export default grammar({
     // LEXICAL ATOMS & IDENTIFIERS
     // ==========================================
 
-    identifier: ($) => /[a-z_][a-zA-Z0-9_]*/,
+    // Kebab-case aware identifiers: letters/underscores, allowing dashes in the middle
+    identifier: ($) => /[a-z_][a-zA-Z0-9_-]*/,
 
     type_identifier: ($) => /[A-Z][a-zA-Z0-9_]*/,
 
+    wildcard: ($) => "_",
+
     string: ($) => seq('"', repeat(/[^"\\]/), '"'),
 
-    number: ($) => /\d+/,
+    number: ($) => /-?\d+/, // Allows negative number literals smoothly
 
     comment: ($) => /\/\/[^\n]*/,
   },
