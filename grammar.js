@@ -1,7 +1,7 @@
 export default grammar({
   name: "kura",
 
-  extras: ($) => [/\s+/, /\/\/[^\n]*/],
+  extras: ($) => [/\s+/, /\/\/[^\n]*/, $.comment],
 
   conflicts: ($) => [
     [$._expression, $.pattern],
@@ -49,6 +49,8 @@ export default grammar({
 
   rules: {
     source: ($) => repeat($._item),
+
+    comment: ($) => /\/\/[^\n]*/,
 
     _item: ($) =>
       choice(
