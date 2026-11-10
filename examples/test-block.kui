@@ -1,0 +1,13 @@
+fn total(): Number => {
+  let base = 10
+  let padding = 4
+  base + padding * 2
+}
+
+fn redefine(): Number => {
+  let x = 1
+  x = x + 1
+  let inner = { x = 100  x }
+  x + inner
+}
+

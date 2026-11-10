@@ -1,0 +1,21 @@
+fn init(): Model =>
+  {
+    count: 0,
+    message: "Hello World",
+  }
+
+fn init2(): Model =>
+  {
+    count: 10 + 10,
+    message: "Hello World",
+  }
+
+fn init4(): Model =>
+  {
+    count: 0,
+  } +
+  {
+    message: "Hello World",
+  }
+
+fn init5(model: Model): Model => { ...model, count: model.count + 1, }

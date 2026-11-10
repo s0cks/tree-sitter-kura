@@ -1,0 +1,4 @@
+fn init(): Content =>
+  #button(fill: 0) {
+    #text()
+  }

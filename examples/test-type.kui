@@ -1,0 +1,10 @@
+fn init(): Model =>
+  {
+    count: 0,
+  }
+
+fn view(state: Model): Content =>
+  #fragment {
+    #text(state.count)
+    #button { #text("Increment") }
+  }
