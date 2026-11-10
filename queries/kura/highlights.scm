@@ -1,60 +1,93 @@
-"type" @keyword.type
-"use" @keyword.import
+(Name) @type
 
-"fn" @keyword.function
-
-[
- "let"
- "fold"
-] @keyword
-
-[
- "in"
- "for"
-] @keyword.repeat
-
-[
- "=>"
- "|>"
-] @operator
-
-[
- "if"
- "else"
- "match"
-] @keyword.conditional
-
-"@" @punctuation.macro
-(annotation
-  name: (identifier) @attribute)
-
-(function_definition
-  name: (identifier) @function)
-(parameter
-  name: (identifier) @variable.parameter)
-(expression (identifier) @variable)
-
-(parameter
-  name: (identifier) @variable.parameter)
-
-(record_field
-  name: (identifier) @property)
-(instantiation_field
-  name: (identifier) @property)
-
-(member_expression
-  property: (identifier) @property)
-
-(wildcard) @variable.builtin
-
-"#" @punctuation.macro
-(element_expression "#" (identifier) @tag)
-(element_property (identifier) @tag.attribute ":")
-(element_property ":" (expression (identifier) @variable))
-(element_args (expression (identifier) @variable))
-
-(type_identifier) @type
-(string) @string
-"\"" @string
 (number) @number
-(comment) @comment
+(unit) @number.float
+(color) @constant.other.color
+(string) @string
+(escape) @string.escape
+
+(name) @variable
+(raw_name) @variable.member
+
+"let" @keyword
+"fn" @keyword.function
+"type" @keyword.type
+"use" @keyword
+"as" @keyword
+"extern" @keyword
+"static-assert" @keyword
+"set" @keyword
+
+[
+  "if"
+  "else"
+  "when"
+  "match"
+  "for"
+  "in"
+  "fold"
+] @keyword.control
+
+[
+  "true"
+  "false"
+] @boolean
+
+"None" @constant.builtin
+"_" @variable.builtin
+
+[
+  "="
+  "=>"
+  "|>"
+  "<|"
+  ">>"
+  "<<"
+  ".."
+  "..="
+  "??"
+  "||"
+  "&&"
+  "is"
+  "=="
+  "!="
+  "<"
+  "<="
+  ">"
+  ">="
+  "+"
+  "-"
+  "*"
+  "/"
+  "%"
+  "!"
+  "+="
+  "-="
+  "*="
+  "/="
+  "%="
+] @keyword.operator
+
+[
+  "("
+  ")"
+  "["
+  "]"
+  "{"
+  "}"
+] @punctuation.bracket
+
+[
+  ","
+  ":"
+  "."
+  "?."
+  "|"
+] @punctuation.delimiter
+
+; ============================================================================
+; 4. UI Elements & Macro Markers
+; ============================================================================
+
+"#" @punctuation.definition.tag
+"@" @punctuation.definition.macro
