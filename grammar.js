@@ -19,13 +19,14 @@ export default grammar({
     [$._primary, $.path],
     [$._primary, $.recordEntry],
     [$._primary, $.arg],
-    [$.pipeChain, $.lambda],
-    [$.pipeChain, $.forExpr],
     [$.uiElement],
     [$.params],
     [$._primary, $.uiChild],
     [$.type],
     [$.rangePattern],
+    [$._expression, $.pipeChain],
+    [$.pipeChain, $.lambda],
+    [$.pipeChain, $.forExpr],
   ],
 
   precedences: ($) => [
@@ -164,63 +165,70 @@ export default grammar({
     // ==========================================
     // EXPRESSIONS & OPERATOR HIERARCHY
     // ==========================================
-    _expression: ($) => choice($.operation, $.pipeChain),
+    _expression: ($) => choice($.pipeChain, $._operation),
 
     pipeChain: ($) =>
       prec.left(
         "pipe",
-        seq($._expression, choice(seq("|>", $.stage), seq("<|", $.operation))),
+        seq($._operation, choice(seq("|>", $.stage), seq("<|", $._operation))),
       ),
 
-    stage: ($) => $.operation,
+    stage: ($) => $._operation,
 
-    operation: ($) => $.compose,
+    _operation: ($) => $._compose,
 
-    compose: ($) =>
+    _compose: ($) =>
       prec.left(
         "compose",
-        seq($.range, repeat(seq(choice(">>", "<<"), $.range))),
+        seq($._range, repeat(seq(choice(">>", "<<"), $._range))),
       ),
 
-    range: ($) =>
+    _range: ($) =>
       prec.left(
         "range",
         choice(
-          seq($.coalesce, choice("..", "..="), optional($.coalesce)),
-          seq(choice("..", "..="), optional($.coalesce)),
-          $.coalesce,
+          seq($._coalesce, choice("..", "..="), optional($._coalesce)),
+          seq(choice("..", "..="), optional($._coalesce)),
+          $._coalesce,
         ),
       ),
 
-    coalesce: ($) =>
-      prec.right("coalesce", seq($.or, optional(seq("??", $.coalesce)))),
+    _coalesce: ($) =>
+      prec.right("coalesce", seq($._or, optional(seq("??", $._coalesce)))),
 
-    or: ($) => prec.left("or", seq($.and, repeat(seq("||", $.and)))),
-    and: ($) => prec.left("and", seq($.is, repeat(seq("&&", $.is)))),
-    is: ($) => prec.left("is", seq($.equality, repeat(seq("is", $.pattern)))),
-    equality: ($) =>
+    _or: ($) => prec.left("or", seq($._and, repeat(seq("||", $._and)))),
+    _and: ($) => prec.left("and", seq($._is, repeat(seq("&&", $._is)))),
+    _is: ($) => prec.left("is", seq($._equality, repeat(seq("is", $.pattern)))),
+    _equality: ($) =>
       prec.left(
         "equality",
-        seq($.comparison, repeat(seq(choice("==", "!="), $.comparison))),
+        seq($._comparison, repeat(seq(choice("==", "!="), $._comparison))),
       ),
-    comparison: ($) =>
+    _comparison: ($) =>
       prec.left(
         "comparison",
-        seq($.additive, repeat(seq(choice("<", "<=", ">", ">="), $.additive))),
+        seq(
+          $._additive,
+          repeat(seq(choice("<", "<=", ">", ">="), $._additive)),
+        ),
       ),
-    additive: ($) =>
+    _additive: ($) =>
       prec.left(
         "additive",
-        seq($.multiplicative, repeat(seq(choice("+", "-"), $.multiplicative))),
+        seq(
+          $._multiplicative,
+          repeat(seq(choice("+", "-"), $._multiplicative)),
+        ),
       ),
-    multiplicative: ($) =>
+    _multiplicative: ($) =>
       prec.left(
         "multiplicative",
-        seq($.unary, repeat(seq(choice("*", "/", "%"), $.unary))),
+        seq($._unary, repeat(seq(choice("*", "/", "%"), $._unary))),
       ),
-    unary: ($) => prec.right("unary", seq(repeat(choice("-", "!")), $.postfix)),
+    _unary: ($) =>
+      prec.right("unary", seq(repeat(choice("-", "!")), $._postfix)),
 
-    postfix: ($) =>
+    _postfix: ($) =>
       prec.left(
         "postfix",
         seq(
@@ -442,22 +450,18 @@ export default grammar({
         $.ifExpr,
         $.forExpr,
         $.matchExpr,
-        $._expression, // Represents arbitrary expression evaluation matching children semantics
+        $._expression,
       ),
 
     // ==========================================
     // LEXICAL RULES (Terminals)
     // ==========================================
     name: ($) => /[a-z_][A-Za-z0-9_]*(-[0-9]*[a-zA-Z_][A-Za-z0-9_]*)*/,
-
     Name: ($) => /[A-Z][A-Za-z0-9_]*/,
-
     raw_name: ($) => seq("`", repeat(/[^`\r\n]/), "`"),
 
-    // Base number token
     number: ($) => /[0-9]+(\.[0-9]+)?/,
 
-    // Explicitly give unit literals higher lexical priority so the suffix wins
     unit: ($) =>
       token(
         prec(
@@ -470,17 +474,10 @@ export default grammar({
         ),
       ),
 
-    // Completely avoids character class token compilation issues by using
-    // basic string matching sequences and explicit negations.
     string: ($) =>
       seq(
         '"',
-        repeat(
-          choice(
-            /[^"\\{\r\n]/, // Single character matching to avoid quantifiers inside classes
-            /\\[nt"\\{}]/,
-          ),
-        ),
+        repeat(choice(/[^"\\{\r\n]/, /\\[nt"\\{}]/, $.interpolation)),
         '"',
       ),
 

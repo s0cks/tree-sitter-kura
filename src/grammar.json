@@ -944,11 +944,11 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "operation"
+          "name": "pipeChain"
         },
         {
           "type": "SYMBOL",
-          "name": "pipeChain"
+          "name": "_operation"
         }
       ]
     },
@@ -960,7 +960,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "_operation"
           },
           {
             "type": "CHOICE",
@@ -987,7 +987,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "operation"
+                    "name": "_operation"
                   }
                 ]
               }
@@ -998,13 +998,13 @@
     },
     "stage": {
       "type": "SYMBOL",
-      "name": "operation"
+      "name": "_operation"
     },
-    "operation": {
+    "_operation": {
       "type": "SYMBOL",
-      "name": "compose"
+      "name": "_compose"
     },
-    "compose": {
+    "_compose": {
       "type": "PREC_LEFT",
       "value": "compose",
       "content": {
@@ -1012,7 +1012,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "range"
+            "name": "_range"
           },
           {
             "type": "REPEAT",
@@ -1034,7 +1034,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "range"
+                  "name": "_range"
                 }
               ]
             }
@@ -1042,7 +1042,7 @@
         ]
       }
     },
-    "range": {
+    "_range": {
       "type": "PREC_LEFT",
       "value": "range",
       "content": {
@@ -1053,7 +1053,7 @@
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "coalesce"
+                "name": "_coalesce"
               },
               {
                 "type": "CHOICE",
@@ -1073,7 +1073,7 @@
                 "members": [
                   {
                     "type": "SYMBOL",
-                    "name": "coalesce"
+                    "name": "_coalesce"
                   },
                   {
                     "type": "BLANK"
@@ -1103,7 +1103,7 @@
                 "members": [
                   {
                     "type": "SYMBOL",
-                    "name": "coalesce"
+                    "name": "_coalesce"
                   },
                   {
                     "type": "BLANK"
@@ -1114,12 +1114,12 @@
           },
           {
             "type": "SYMBOL",
-            "name": "coalesce"
+            "name": "_coalesce"
           }
         ]
       }
     },
-    "coalesce": {
+    "_coalesce": {
       "type": "PREC_RIGHT",
       "value": "coalesce",
       "content": {
@@ -1127,7 +1127,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "or"
+            "name": "_or"
           },
           {
             "type": "CHOICE",
@@ -1141,7 +1141,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "coalesce"
+                    "name": "_coalesce"
                   }
                 ]
               },
@@ -1153,7 +1153,7 @@
         ]
       }
     },
-    "or": {
+    "_or": {
       "type": "PREC_LEFT",
       "value": "or",
       "content": {
@@ -1161,7 +1161,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "and"
+            "name": "_and"
           },
           {
             "type": "REPEAT",
@@ -1174,7 +1174,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "and"
+                  "name": "_and"
                 }
               ]
             }
@@ -1182,7 +1182,7 @@
         ]
       }
     },
-    "and": {
+    "_and": {
       "type": "PREC_LEFT",
       "value": "and",
       "content": {
@@ -1190,7 +1190,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "is"
+            "name": "_is"
           },
           {
             "type": "REPEAT",
@@ -1203,7 +1203,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "is"
+                  "name": "_is"
                 }
               ]
             }
@@ -1211,7 +1211,7 @@
         ]
       }
     },
-    "is": {
+    "_is": {
       "type": "PREC_LEFT",
       "value": "is",
       "content": {
@@ -1219,7 +1219,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "equality"
+            "name": "_equality"
           },
           {
             "type": "REPEAT",
@@ -1240,7 +1240,7 @@
         ]
       }
     },
-    "equality": {
+    "_equality": {
       "type": "PREC_LEFT",
       "value": "equality",
       "content": {
@@ -1248,7 +1248,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "comparison"
+            "name": "_comparison"
           },
           {
             "type": "REPEAT",
@@ -1270,7 +1270,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "comparison"
+                  "name": "_comparison"
                 }
               ]
             }
@@ -1278,7 +1278,7 @@
         ]
       }
     },
-    "comparison": {
+    "_comparison": {
       "type": "PREC_LEFT",
       "value": "comparison",
       "content": {
@@ -1286,7 +1286,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "additive"
+            "name": "_additive"
           },
           {
             "type": "REPEAT",
@@ -1316,7 +1316,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "additive"
+                  "name": "_additive"
                 }
               ]
             }
@@ -1324,7 +1324,7 @@
         ]
       }
     },
-    "additive": {
+    "_additive": {
       "type": "PREC_LEFT",
       "value": "additive",
       "content": {
@@ -1332,7 +1332,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "multiplicative"
+            "name": "_multiplicative"
           },
           {
             "type": "REPEAT",
@@ -1354,7 +1354,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "multiplicative"
+                  "name": "_multiplicative"
                 }
               ]
             }
@@ -1362,7 +1362,7 @@
         ]
       }
     },
-    "multiplicative": {
+    "_multiplicative": {
       "type": "PREC_LEFT",
       "value": "multiplicative",
       "content": {
@@ -1370,7 +1370,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "unary"
+            "name": "_unary"
           },
           {
             "type": "REPEAT",
@@ -1396,7 +1396,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "unary"
+                  "name": "_unary"
                 }
               ]
             }
@@ -1404,7 +1404,7 @@
         ]
       }
     },
-    "unary": {
+    "_unary": {
       "type": "PREC_RIGHT",
       "value": "unary",
       "content": {
@@ -1428,12 +1428,12 @@
           },
           {
             "type": "SYMBOL",
-            "name": "postfix"
+            "name": "_postfix"
           }
         ]
       }
     },
-    "postfix": {
+    "_postfix": {
       "type": "PREC_LEFT",
       "value": "postfix",
       "content": {
@@ -3046,6 +3046,10 @@
               {
                 "type": "PATTERN",
                 "value": "\\\\[nt\"\\\\{}]"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "interpolation"
               }
             ]
           }
@@ -3198,14 +3202,6 @@
       "arg"
     ],
     [
-      "pipeChain",
-      "lambda"
-    ],
-    [
-      "pipeChain",
-      "forExpr"
-    ],
-    [
       "uiElement"
     ],
     [
@@ -3220,6 +3216,18 @@
     ],
     [
       "rangePattern"
+    ],
+    [
+      "_expression",
+      "pipeChain"
+    ],
+    [
+      "pipeChain",
+      "lambda"
+    ],
+    [
+      "pipeChain",
+      "forExpr"
     ]
   ],
   "precedences": [
